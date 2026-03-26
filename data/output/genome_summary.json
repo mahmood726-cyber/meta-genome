@@ -1,0 +1,98 @@
+{
+  "n_reviews": 307,
+  "n_features": 26,
+  "pca_variance_explained": [
+    0.21,
+    0.123
+  ],
+  "n_components_90pct": 11,
+  "clusters": {
+    "0": {
+      "n": 2,
+      "archetype": "Pathological",
+      "robustness": 78.2,
+      "adversarial_gap": 8.869,
+      "correction_pct": 38.5,
+      "stabilizes_pct": 50.0,
+      "n_modes_mean": 8.0,
+      "conformal_coverage": 0.962,
+      "standard_coverage": 0.526
+    },
+    "1": {
+      "n": 124,
+      "archetype": "Moderate",
+      "robustness": 60.4,
+      "adversarial_gap": 0.27,
+      "correction_pct": 28.0,
+      "stabilizes_pct": 84.7,
+      "n_modes_mean": 2.9,
+      "conformal_coverage": 0.922,
+      "standard_coverage": 0.765
+    },
+    "2": {
+      "n": 109,
+      "archetype": "Healthy",
+      "robustness": 74.3,
+      "adversarial_gap": 0.58,
+      "correction_pct": 26.1,
+      "stabilizes_pct": 35.8,
+      "n_modes_mean": 2.1,
+      "conformal_coverage": 0.916,
+      "standard_coverage": 0.55
+    },
+    "3": {
+      "n": 72,
+      "archetype": "Pathological",
+      "robustness": 65.3,
+      "adversarial_gap": 0.443,
+      "correction_pct": 141.7,
+      "stabilizes_pct": 2.8,
+      "n_modes_mean": 2.1,
+      "conformal_coverage": 0.927,
+      "standard_coverage": 0.842
+    }
+  },
+  "top_features": [
+    {
+      "name": "pct_heterogeneity",
+      "f_stat": 207.5
+    },
+    {
+      "name": "pct_sampling",
+      "f_stat": 194.6
+    },
+    {
+      "name": "I2",
+      "f_stat": 185.8
+    },
+    {
+      "name": "pi_ci_ratio",
+      "f_stat": 136.0
+    },
+    {
+      "name": "kurtosis",
+      "f_stat": 132.6
+    },
+    {
+      "name": "tau2",
+      "f_stat": 131.7
+    },
+    {
+      "name": "skewness",
+      "f_stat": 86.6
+    },
+    {
+      "name": "stabilizes",
+      "f_stat": 76.6
+    },
+    {
+      "name": "frac_significant",
+      "f_stat": 61.5
+    },
+    {
+      "name": "orb_score",
+      "f_stat": 59.3
+    }
+  ],
+  "elapsed": 6.7
+}
