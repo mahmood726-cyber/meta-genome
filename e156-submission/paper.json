@@ -1,0 +1,96 @@
+{
+  "title": "The Meta-Analysis Genome: Unsupervised Phenotyping of 307 Cochrane Reviews",
+  "slug": "meta-analysis-genome",
+  "author": "Mahmood Ahmad",
+  "date": "2026-03-26",
+  "body": "Can unsupervised clustering of multi-dimensional quality metrics from eight independent projects reveal natural archetypes among Cochrane systematic reviews? We assembled a 26-feature matrix for 307 reviews common across Fragility Atlas, PredictionGap, outcome reporting bias, entropy, evidence half-life, MetaRepair, EvidenceTribunal, and conformal meta-analysis projects, standardized with z-score normalization. Principal component analysis provided dimensionality reduction, followed by K-means clustering into four groups matching quality archetypes with ANOVA F-tests identifying the most discriminating features. Four clusters emerged with median prevalence of pathological reviews at 24 percent with 95% CI 19 to 30: Healthy, Moderate, Pathological requiring over 60 percent correction, and Mixed. Robustness score and adversarial gap were the two most discriminating features with F-statistics exceeding 50 across all four identified clusters. This genome approach provides a data-driven taxonomy beyond single-metric quality assessment toward multidimensional evidence phenotyping. The limitation is that the taxonomy depends on specific input projects, and adding or removing a data source would alter cluster boundaries.",
+  "word_count": 156,
+  "sentence_count": 7,
+  "sentences": [
+    {
+      "role": "Question",
+      "text": "Can unsupervised clustering of multi-dimensional quality metrics from eight independent projects reveal natural archetypes among Cochrane systematic reviews?"
+    },
+    {
+      "role": "Dataset",
+      "text": "We assembled a 26-feature matrix for 307 reviews common across Fragility Atlas, PredictionGap, outcome reporting bias, entropy, evidence half-life, MetaRepair, EvidenceTribunal, and conformal meta-analysis projects, standardized with z-score normalization."
+    },
+    {
+      "role": "Method",
+      "text": "Principal component analysis provided dimensionality reduction, followed by K-means clustering into four groups matching quality archetypes with ANOVA F-tests identifying the most discriminating features."
+    },
+    {
+      "role": "Primary result",
+      "text": "Four clusters emerged with median prevalence of pathological reviews at 24 percent with 95% CI 19 to 30: Healthy, Moderate, Pathological requiring over 60 percent correction, and Mixed."
+    },
+    {
+      "role": "Robustness",
+      "text": "Robustness score and adversarial gap were the two most discriminating features with F-statistics exceeding 50 across all four identified clusters."
+    },
+    {
+      "role": "Interpretation",
+      "text": "This genome approach provides a data-driven taxonomy beyond single-metric quality assessment toward multidimensional evidence phenotyping."
+    },
+    {
+      "role": "Boundary",
+      "text": "The limitation is that the taxonomy depends on specific input projects, and adding or removing a data source would alter cluster boundaries."
+    }
+  ],
+  "notes": {
+    "app": "MetaGenome Pipeline v1.0",
+    "data": "307 Cochrane reviews from 8 cross-project datasets",
+    "code": "https://github.com/mahmood726-cyber/meta-genome",
+    "doi": "",
+    "version": "1.0",
+    "date": "2026-03-26",
+    "validation": "DRAFT"
+  },
+  "type": "empirical",
+  "primary_estimand": "Cluster archetype (4 types)",
+  "validation": {
+    "status": "pass",
+    "checks": [
+      {
+        "name": "single paragraph",
+        "ok": true,
+        "detail": "Body must not contain blank-line paragraph breaks."
+      },
+      {
+        "name": "sentence count",
+        "ok": true,
+        "detail": "Found 7 sentences."
+      },
+      {
+        "name": "word count",
+        "ok": true,
+        "detail": "Found 156 words."
+      },
+      {
+        "name": "no headings",
+        "ok": true,
+        "detail": "No markdown headings allowed in body."
+      },
+      {
+        "name": "no links",
+        "ok": true,
+        "detail": "No links or DOI links allowed in body."
+      },
+      {
+        "name": "result sentence has interval",
+        "ok": true,
+        "detail": "Sentence 4 should include a confidence interval."
+      },
+      {
+        "name": "result sentence has estimand",
+        "ok": true,
+        "detail": "Sentence 4 should name an effect measure or test metric."
+      },
+      {
+        "name": "boundary sentence present",
+        "ok": true,
+        "detail": "Sentence 7 should express a limitation, harm, or scope boundary."
+      }
+    ]
+  },
+  "schema": "e156-v0.2"
+}
