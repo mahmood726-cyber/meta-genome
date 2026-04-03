@@ -226,11 +226,19 @@ def main():
             row[fname] = round(float(X[i, j]), 4)
         rows.append(row)
 
+    def csv_safe(val):
+        """Prepend tick to cells starting with =+@\\t\\r to prevent CSV formula injection."""
+        s = str(val) if val is not None else ''
+        if s and s[0] in ('=', '+', '@', '\t', '\r'):
+            return "'" + s
+        return s
+
     fields = list(rows[0].keys())
+    safe_rows = [{k: csv_safe(v) for k, v in row.items()} for row in rows]
     with open(OUTPUT_DIR / 'genome_results.csv', 'w', newline='', encoding='utf-8') as f:
         writer = csv.DictWriter(f, fieldnames=fields)
         writer.writeheader()
-        writer.writerows(rows)
+        writer.writerows(safe_rows)
 
     summary = {
         'n_reviews': len(review_ids),
