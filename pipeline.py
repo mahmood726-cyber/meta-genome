@@ -1,4 +1,4 @@
-"""The Meta-Analysis Genome: UMAP clustering of 307 Cochrane reviews.
+"""The Meta-Analysis Genome: PCA + K-Means clustering of 307 Cochrane reviews.
 
 Each review is characterised by 30+ metrics from 8 projects:
   - Fragility Atlas (robustness, eta2, frac_sig)
@@ -12,7 +12,7 @@ Each review is characterised by 30+ metrics from 8 projects:
   - ConformalMA (coverage gap, width ratio)
   - Entropy (NEI, n_modes, skewness, kurtosis)
 
-Apply UMAP to find natural clusters. Then characterise each cluster.
+Apply PCA + K-Means to find natural clusters. Then characterise each cluster.
 """
 
 import csv
@@ -65,6 +65,15 @@ def main():
     # Common reviews
     common = set(fragility) & set(prediction) & set(orb) & set(halflife) & set(repair) & set(tribunal) & set(conformal) & set(entropy)
     print(f"  Common reviews across all 8 projects: {len(common)}")
+
+    # Fail closed on empty intersection: downstream KMeans/PCA and the
+    # rows[0] header access below all raise on a zero-row matrix.
+    if not common:
+        raise SystemExit(
+            "No reviews common to all 8 source datasets; cannot build the "
+            "genome feature matrix. Check that every input CSV uses the same "
+            "review_id key and is non-empty."
+        )
 
     # Build feature matrix
     feature_names = [
@@ -140,7 +149,10 @@ def main():
     pca_full = PCA(n_components=min(10, X.shape[1]))
     X_pca = pca_full.fit_transform(X_scaled)
     cumvar = np.cumsum(pca_full.explained_variance_ratio_)
-    n_components_90 = np.searchsorted(cumvar, 0.90) + 1
+    # searchsorted returns len(cumvar) when 90% is never reached within the
+    # (capped) component count; clamp so we never report more components than
+    # were actually computed.
+    n_components_90 = min(int(np.searchsorted(cumvar, 0.90)) + 1, len(cumvar))
     print(f"  Components for 90% variance: {n_components_90}")
 
     # K-Means clustering (k=4, matching the ABCD grading metaphor)
