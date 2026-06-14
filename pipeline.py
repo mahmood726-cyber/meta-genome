@@ -12,7 +12,12 @@ Each review is characterised by 30+ metrics from 8 projects:
   - ConformalMA (coverage gap, width ratio)
   - Entropy (NEI, n_modes, skewness, kurtosis)
 
-Apply PCA + K-Means to find natural clusters. Then characterise each cluster.
+Apply PCA + K-Means under an IMPOSED ABCD grading (k=4 fixed), then characterise
+each cluster. The 4-way split is a chosen grading scheme, NOT "4 species
+discovered via clustering": k=4 is hardcoded, so K-Means always returns four
+groups regardless of whether four real clusters exist. The pipeline therefore
+reports the silhouette at k=4, a silhouette-vs-k curve, and the model-selection
+best-k, and warns when the 4-way structure is not data-supported.
 """
 
 import csv
@@ -23,6 +28,7 @@ from pathlib import Path
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans, DBSCAN
 from sklearn.decomposition import PCA
+from sklearn.metrics import silhouette_score
 from collections import Counter
 import time
 
@@ -155,13 +161,62 @@ def main():
     n_components_90 = min(int(np.searchsorted(cumvar, 0.90)) + 1, len(cumvar))
     print(f"  Components for 90% variance: {n_components_90}")
 
-    # K-Means clustering (k=4, matching the ABCD grading metaphor)
+    # K-Means clustering with an IMPOSED k=4 (the ABCD grading scheme), NOT a
+    # data-driven discovery of "4 species". K-Means with k=4 always returns a
+    # 4-way partition of any point cloud, so "4 clusters" follows from the choice
+    # of k=4, not from the data. We therefore (a) compute the silhouette of the
+    # imposed k=4 fit, (b) run proper model selection (best k by silhouette over
+    # k in 2..8) and report it, and (c) warn if the k=4 silhouette is too low for
+    # the 4-way structure to be data-supported.
+    #
+    # Calibration (truth-recovery/harness.py, 200 reps, seeded): silhouette at
+    # k=4 is ~0.095 on truly homogeneous data vs ~0.617 on genuine 4-cluster
+    # data, and model selection picks k=4 only 0.5% of the time on homogeneous
+    # data vs 90% on real 4-cluster data. The silhouette cleanly discriminates
+    # real structure from noise; hardcoded k=4 cannot. SILHOUETTE_FLOOR sits
+    # between those two regimes.
+    SILHOUETTE_FLOOR = 0.25
+
     kmeans = KMeans(n_clusters=4, random_state=42, n_init=10)
     labels_km = kmeans.fit_predict(X_scaled)
 
-    # Characterise clusters
+    # Silhouette of the imposed k=4 fit (validity of the ABCD partition).
+    if len(set(labels_km)) >= 2:
+        silhouette_k4 = float(silhouette_score(X_scaled, labels_km))
+    else:
+        silhouette_k4 = -1.0
+
+    # Silhouette-vs-k curve and model-selection best-k over k in 2..8.
+    silhouette_by_k = {}
+    for k in range(2, 9):
+        km_k = KMeans(n_clusters=k, random_state=42, n_init=10).fit_predict(X_scaled)
+        if len(set(km_k)) >= 2:
+            silhouette_by_k[k] = float(silhouette_score(X_scaled, km_k))
+        else:
+            silhouette_by_k[k] = -1.0
+    best_k = max(silhouette_by_k, key=silhouette_by_k.get)
+
+    k4_supported = silhouette_k4 >= SILHOUETTE_FLOOR
+    print(f"\n  Cluster validity (silhouette, higher=better separation):")
+    print(f"    Imposed ABCD k=4 silhouette: {silhouette_k4:.3f}")
+    print("    Silhouette-vs-k: " + "  ".join(
+        f"k={k}:{silhouette_by_k[k]:.3f}" for k in range(2, 9)))
+    print(f"    Model-selection best-k (max silhouette over 2..8): {best_k} "
+          f"(silhouette {silhouette_by_k[best_k]:.3f})")
+    if not k4_supported:
+        print(f"    WARNING: k=4 silhouette {silhouette_k4:.3f} < {SILHOUETTE_FLOOR} "
+              f"-- the 4-way structure is NOT data-supported. The ABCD partition "
+              f"below is an IMPOSED grading scheme, not 4 species discovered via "
+              f"clustering. Model selection prefers k={best_k}.")
+    elif best_k != 4:
+        print(f"    NOTE: k=4 silhouette {silhouette_k4:.3f} >= {SILHOUETTE_FLOOR}, but "
+              f"model selection prefers k={best_k}; the ABCD k=4 split is imposed, "
+              f"not the validity-optimal partition.")
+
+    # Characterise clusters under the IMPOSED ABCD grading (k=4).
     print(f"\n{'='*60}")
-    print("GENOME CLUSTERS (K-Means, k=4)")
+    print(f"IMPOSED ABCD GRADING (K-Means, k=4; silhouette={silhouette_k4:.3f}, "
+          f"model-selection best-k={best_k})")
     print(f"{'='*60}")
 
     cluster_profiles = {}
@@ -257,6 +312,16 @@ def main():
         'n_features': len(feature_names),
         'pca_variance_explained': [round(float(v), 3) for v in var_explained],
         'n_components_90pct': int(n_components_90),
+        # Cluster-validity report. The k=4 split is an IMPOSED ABCD grading
+        # scheme, NOT "4 species discovered via clustering": these fields let
+        # downstream consumers gate on whether the 4-way structure is actually
+        # data-supported (silhouette >= silhouette_floor and best_k == 4).
+        'clustering': 'imposed ABCD grading (k=4 fixed), not data-driven species discovery',
+        'silhouette_k4': round(silhouette_k4, 4),
+        'silhouette_by_k': {str(k): round(v, 4) for k, v in silhouette_by_k.items()},
+        'model_selection_best_k': int(best_k),
+        'silhouette_floor': SILHOUETTE_FLOOR,
+        'k4_data_supported': bool(k4_supported and best_k == 4),
         'clusters': cluster_profiles,
         'top_features': [{'name': n, 'f_stat': round(f, 1)} for n, f, _ in f_scores[:10]],
         'elapsed': round(time.time() - t0, 1),
